@@ -140,22 +140,81 @@
 // user.printHobbiesBad(); // Fails - this.name is undefined
 // user.printHobbiesGood(); // Works - shows all hobbies
 
-const functionTypes = {
-  regularFunction: function () {
-    console.log('Arguments length, arguments.length');
-    console.log('First argument:', arguments[0]);
-  },
+// const functionTypes = {
+//   regularFunction: function () {
+//     console.log('Arguments length, arguments.length');
+//     console.log('First argument:', arguments[0]);
+//   },
 
-  arrowFunction: () => {
-    console.log(arguments);
-    console.log('Arrow function called');
-  },
+//   arrowFunction: () => {
+//     console.log(arguments);
+//     console.log('Arrow function called');
+//   },
 
-  modernFunction: (...args) => {
-    console.log('Args length:', args.length);
-    console.log('First arg', arg[0]);
-  },
+//   modernFunction: (...args) => {
+//     console.log('Args length:', args.length);
+//     console.log('First arg', arg[0]);
+//   },
+// };
+
+// functionTypes.regularFunction('Hello', 'World');
+// functionTypes.modernFunction('modern', 'approach');
+
+//Primitive
+// let age = 30;
+// let oldAge = age;
+// age = 31;
+// console.log('age', age);
+// console.log('old age: ', oldAge);
+
+// //OBJECT HEAP
+// //objects are stored on heap, variable hold ref
+// const me = { name: 'jonas', age: 30 };
+// const friend = me;
+// friend.age = 27;
+// console.log('me', me);
+// console.log('Friend', friend);
+
+function changeAge(person, newAge) {
+  person.age = newAge;
+  return person;
+}
+
+const originalPerson = { name: 'Sarah', age: 25 };
+const updatedPerson = changeAge(originalPerson, 30);
+
+console.log('Same object?:', originalPerson === updatedPerson);
+
+const original = {
+  name: 'Alice',
+  age: 28,
+  hobbies: ['reading', 'codings'],
 };
 
-functionTypes.regularFunction('Hello', 'World');
-functionTypes.modernFunction('modern', 'approach');
+const shallowCopy = { ...original };
+shallowCopy.name = 'Bob';
+console.log('Original name:', original.name);
+console.log('Shallow name:', shallowCopy.name);
+
+shallowCopy.hobbies.push('gaming');
+console.log('original hobbies:', original.hobbies);
+console.log('shallow hobbies', shallowCopy.hobbies);
+
+//DEEP COPY
+const deepOriginal = {
+  name: 'Charlie',
+  age: 32,
+  address: { city: 'Paris', country: 'France' },
+  hobbies: ['travel', 'photography'],
+};
+
+const deepCopy = structuredClone(deepOriginal);
+deepCopy.address.city = 'London';
+deepCopy.hobbies.push('cooking');
+deepCopy.name = 'Lex';
+
+console.log('Original address', deepOriginal.address);
+console.log('Copy Address:', deepCopy.address);
+
+console.log('Original Hobbies:', deepOriginal.hobbies);
+console.log('Copy Hobbies:', deepCopy.hobbies);
