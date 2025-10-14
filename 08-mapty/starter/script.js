@@ -1,16 +1,16 @@
 'use strict';
 
-console.log('MAPTY OOP FOUNDATION');
+console.log('MAPTY — Refactored App Version');
 
+// Base Workout class
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
-  clicks = 0;
 
   constructor(coords, distance, duration) {
-    this.coords = coords;
-    this.distance = distance;
-    this.duration = duration;
+    this.coords = coords; // [lat, lng]
+    this.distance = distance; // in km
+    this.duration = duration; // in min
   }
 
   _setDescription() {
@@ -32,23 +32,12 @@ class Workout {
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
   }
-
-  click() {
-    this.clicks++;
-  }
 }
 
-const testWorkout = new Workout([40.7128, -74.006], 5.2, 24);
-console.log('Test Workout', testWorkout);
-console.log('Workout ID:', testWorkout.id);
-console.log('Workout Date:', testWorkout.date);
-
-testWorkout.click();
-testWorkout.click();
-console.log('Click count:', testWorkout.clicks);
-
+// Running subclass
 class Running extends Workout {
   type = 'running';
+
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
@@ -62,8 +51,10 @@ class Running extends Workout {
   }
 }
 
+// Cycling subclass
 class Cycling extends Workout {
   type = 'cycling';
+
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
@@ -77,27 +68,56 @@ class Cycling extends Workout {
   }
 }
 
-const run1 = new Running([39.7392, -104.9903], 5.2, 24, 178);
-console.log('=== RUNNING WORKOUT ===');
-console.log('Distance:', run1.distance, 'km');
-console.log('Duration:', run1.duration, 'min');
-console.log('Cadence:', run1.cadence, 'spm');
-console.log('Pace:', run1.pace.toFixed(1), 'min/km');
-console.log('Description:', run1.description);
-console.log('ID:', run1.id);
+class App {
+  #map;
+  #mapZoomLevel = 13;
+  #mapEvent;
+  #workouts = [];
 
-const cycling1 = new Cycling([39.7392, -104.9903], 27, 95, 523);
-console.log('=== CYCLING WORKOUT ===');
-console.log('Distance:', cycling1.distance, 'km');
-console.log('Duration:', cycling1.duration, 'min');
-console.log('Elevation Gain:', cycling1.elevationGain, 'm');
-console.log('Speed:', cycling1.speed.toFixed(1), 'km/h');
-console.log('Description:', cycling1.description);
-console.log('ID:', cycling1.id);
+  constructor() {
+    // When the app starts, get user position
+    this._getPosition();
+  }
 
-console.log('=== INHERITANCE TESTING ===');
-console.log(
-  'Both inherit from Workout:',
-  run1 instanceof Workout,
-  cycling1 instanceof Workout
-);
+  _getPosition() {
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+        function () {
+          alert('Could not get your position 😢');
+        }
+      );
+  }
+
+  _loadMap(position) {
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
+    const coords = [latitude, longitude];
+
+    // Load and display map
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this.#map);
+
+    // Handle map clicks
+    this.#map.on('click', this._showForm.bind(this));
+  }
+
+  _showForm(mapE) {
+    this.#mapEvent = mapE;
+
+    const { lat, lng } = mapE.latlng;
+    console.log(`Map clicked at: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+
+    // Add a temporary marker at clicked location
+    L.marker([lat, lng])
+      .addTo(this.#map)
+      .bindPopup(`Clicked here: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+      .openPopup();
+  }
+}
+
+const app = new App();
